@@ -1,0 +1,51 @@
+# Promise.allSettled()
+在学Promise时，我们都知道Promise.all()具有并发执行异步任务的能力。但它最大的问题就是如果其中某个任务出现异常(reject),所有任务都会挂掉，Promise直接进入reject状态。
+### 场景：现在页面上有三个请求，分别请求不同的数据，如果一个接口服务异常，整个都是失败的，都无法渲染出数据。
+```js
+Promise.all([
+    Promise.reject({
+        code:500,
+        msg:'服务异常'
+    }),
+    Promise.resolve({
+        code:200,
+        data:[1,2,3]
+    }),
+    Promise.resolve({
+        code:200,
+        data:[4,5,6]
+    })
+]).then(res=>{
+    console.log(res)
+    console.log('success')
+}).catch(err=>{
+    console.log(err)
+    console.log('failure')
+})
+//{code: 500, msg: "服务异常"}
+//failure
+```
+我们需要一种机制，如果并发任务中，无论一个任务正常或者异常，都会返回对应的状态
+```js
+Promise.allSettled([
+    Promise.reject({
+        code:500,
+        msg:'服务异常'
+    }),
+    Promise.resolve({
+        code:200,
+        data:[1,2,3]
+    }),
+    Promise.resolve({
+        code:200,
+        data:[4,5,6]
+    })
+]).then(res=>{
+    console.log(res)
+    const data = res.filter(item=>item.status==="fulfilled")
+    console.log(data)
+}).catch(err=>{
+    console.log(err)
+    console.log('failure')
+})
+```
